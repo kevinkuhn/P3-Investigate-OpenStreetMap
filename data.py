@@ -123,9 +123,6 @@ def process_map(file_in, pretty):
     return data
 
 def test():
-    # NOTE: if you are running this code on your computer, with a larger dataset, 
-    # call the process_map procedure with pretty=False. The pretty=True option adds 
-    # additional spaces to the output, making it significantly larger.
     data = process_map('source/lucerne.osm', True)
     #pprint.pprint(data)
     print data[0]
@@ -143,13 +140,6 @@ def test():
         }
     }
     assert data[0] == correct_first_elem
-    '''
-                assert data[-1]["address"] == {
-                                                "street": "West Lexington St.", 
-                                                "housenumber": "1412"
-                                                  }
-                assert data[-1]["node_refs"] == [ "2199822281", "2199822390",  "2199822392", "2199822369", 
-                                                "2199822370", "2199822284", "2199822281"]'''
 
 if __name__ == "__main__":
     test()
