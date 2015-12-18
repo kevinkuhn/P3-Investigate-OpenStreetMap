@@ -13,6 +13,8 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
+*.osm
+*.json
 
 # Windows shortcuts
 *.lnk
