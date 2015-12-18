@@ -16,7 +16,7 @@ def is_address(elem):
     if elem.attrib['k'][:5] == "addr:":
         return True
 
-def shape_element(element):
+'''def shape_element(element):
     node = {}
     if element.tag == "node" or element.tag == "way" :
         for key in element.attrib.keys():
@@ -66,4 +66,90 @@ def shape_element(element):
 
         return node
     else:
+        return None'''
+
+def shape_element(element):
+    node = {}
+    
+    if element.tag != "node" and element.tag != "way" :
         return None
+    else:
+        node['type']    = element.tag        
+        node['pos']     = [None,None]
+
+        for key in element.keys():
+            if key in setup:
+                node.setdefault('created', {})
+                node['created'][key] = element.get(key)
+            elif key == "lat":
+                node['pos'][0] = float(element.get(key))
+            elif key == "lon":
+                node['pos'][1] = float(element.get(key))
+            else:
+                node[key] = element.get(key)
+
+        for child_element in iter(element):
+            if child_element.tag == "nd":
+                node.setdefault('node_refs', []).append(child_element.attrib["ref"])
+            elif child_element.tag == "tag":
+                key = child_element.attrib["k"]
+                if (problemchars.search(key)):
+                    continue
+                elif(key.startswith('addr:')):
+                    node.setdefault('address', {})
+                    addr = key.split(':')
+                    
+                    if(len(addr)==2):
+                        key = addr[1]
+                        node['address'][key] = child_element.attrib["v"]
+                else:
+                    node[key] = child_element.attrib["v"]
+        return node
+
+
+def process_map(file_in, pretty):
+    # You do not need to change this file
+    file_out = "{0}.json".format(file_in)
+    data = []
+    with codecs.open(file_out, "w") as fo:
+        for _, element in ET.iterparse(file_in):
+            el = shape_element(element)
+            if el:
+                data.append(el)
+                if pretty:
+                    fo.write(json.dumps(el, indent=2)+"\n")
+                else:
+                    fo.write(json.dumps(el) + "\n")
+    return data
+
+def test():
+    # NOTE: if you are running this code on your computer, with a larger dataset, 
+    # call the process_map procedure with pretty=False. The pretty=True option adds 
+    # additional spaces to the output, making it significantly larger.
+    data = process_map('source/lucerne.osm', True)
+    #pprint.pprint(data)
+    print data[0]
+    
+    correct_first_elem = {
+    'id': '780188', 
+    'type': 'node', 
+    'pos': [47.0537166, 8.2545779], 
+    'created': {
+        'changeset': '6577828', 
+        'user': 'aMuTeX', 
+        'version': '5', 
+        'uid': '75217', 
+        'timestamp': '2010-12-07T18:29:07Z'
+        }
+    }
+    assert data[0] == correct_first_elem
+    '''
+                assert data[-1]["address"] == {
+                                                "street": "West Lexington St.", 
+                                                "housenumber": "1412"
+                                                  }
+                assert data[-1]["node_refs"] == [ "2199822281", "2199822390",  "2199822392", "2199822369", 
+                                                "2199822370", "2199822284", "2199822281"]'''
+
+if __name__ == "__main__":
+    test()
