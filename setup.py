@@ -10,3 +10,7 @@ import codecs
 from codecs import open
 import json
 import string
+
+# Import XML/OSM file into a directory
+file_path = "source\lucerne.osm"
+osm_file = open(file_path, "r")
