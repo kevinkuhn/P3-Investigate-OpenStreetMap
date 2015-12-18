@@ -53,6 +53,9 @@ def key_type(element, keys):
 
     return keys
 
+# show all tags found in the dataset and count
+pprint.pprint(count_tags(file_path))
+
 def process_map(filename):
     keys = {"lower": 0, "lower_colon": 0, "problemchars": 0, "other": 0}
     for _, element in ET.iterparse(filename):
@@ -60,5 +63,5 @@ def process_map(filename):
 
     return keys
 
-# show all tags found in the dataset and count
-pprint.pprint(count_tags(file_path))
+# show problematic dataset
+pprint.pprint(process_map(file_path))
