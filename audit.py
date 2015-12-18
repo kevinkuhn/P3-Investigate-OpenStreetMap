@@ -12,6 +12,8 @@ expected = ["strasse","Strasse", "platz",
 			"halde", "quai", "ring", "hof",
 			"weid"]
 
+checkEnding = ["str."]
+
 # mapping definitions
 mapping = { "St" : "Street",
             "St.": "Street",
@@ -69,4 +71,4 @@ def audit(osmfile):
     return street_types
 
 if __name__ == '__main__':
-    audit()
+    audit(OSMFILE)
