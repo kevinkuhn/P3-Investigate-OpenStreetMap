@@ -42,3 +42,8 @@ def audit_street_types(street_types, street_name):
 def is_street_name(elem):
     return (elem.attrib['k'] == "addr:street")
 
+# function to check if there is an unexpected, shorter ending used within the dataset
+def check_ending(street_name, checkEnding):
+    for unex in checkEnding:
+        if street_name[len(street_name)-len(unex):len(street_name)] == unex:
+            print "unexpected ending in: ", street_name  
