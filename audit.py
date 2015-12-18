@@ -11,3 +11,10 @@ expected = ["strasse","Strasse", "platz",
 			"weg","gasse","matt","matte",
 			"halde", "quai", "ring", "hof",
 			"weid"]
+
+# mapping definitions
+mapping = { "St" : "Street",
+            "St.": "Street",
+            "Rd." : "Road",
+            "Ave": "Avenue"
+            }
