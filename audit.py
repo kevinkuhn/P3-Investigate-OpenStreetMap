@@ -67,4 +67,6 @@ def audit(osmfile):
     # print the number of streets that do not fit to the expectations
     #print len (street_types)
     return street_types
-    
+
+if __name__ == '__main__':
+    audit()
