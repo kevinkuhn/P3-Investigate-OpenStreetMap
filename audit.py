@@ -37,3 +37,8 @@ def audit_street_types(street_types, street_name):
                 if myLoops == len(expected):
                     street_types[street_type].add(street_name)
                     myLoops = 0 # reset of the loop when loop limit reached
+
+# Returns the k attribute for XML list if it equal to a street address
+def is_street_name(elem):
+    return (elem.attrib['k'] == "addr:street")
+
