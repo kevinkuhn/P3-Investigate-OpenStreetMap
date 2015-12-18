@@ -4,6 +4,7 @@ import xml.etree.cElementTree as ET
 from collections import defaultdict
 import re
 import pprint
+import sys
 
 OSMFILE = "source\lucerne.osm"
 street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
@@ -52,6 +53,17 @@ def check_ending(street_name, checkEnding):
         if street_name[len(street_name)-len(unex):len(street_name)] == unex:
             print "unexpected ending in: ", street_name
 
+def set_utf8(message):
+	import sys
+	# Change message into unicode and compile it with the defined charset
+	return message.decode("utf-8").encode(sys.stdout.encoding)
+
+def update_name(name, mapping):
+    st_type = street_type_re.search(name).group()
+    if st_type in mapping:
+        name = street_type_re.sub(mapping[st_type],name)
+    return name
+
 # Create an audit an check with functions above
 def audit(osmfile):
     osm_file = open(osmfile, "r")
@@ -67,10 +79,24 @@ def audit(osmfile):
                     # audit checks if it is an expected or unexpected street name based on attribute v
                     audit_street_types(street_types, tag.attrib['v'])
     # print out the list of unexpected street names as a dictonary
-    pprint.pprint(dict(street_types))
+    #pprint.pprint(dict(street_types))
     # print the number of streets that do not fit to the expectations
     #print len (street_types)
     return street_types
 
+def test():
+    st_types = audit(OSMFILE)
+    assert len(st_types) == 3
+    pprint.pprint(dict(st_types))
+    for st_type, ways in st_types.iteritems():
+        for name in ways:
+            better_name = update_name(name, mapping)
+            print name, "=>", better_name
+            #if name == "West Lexington St.":
+            #    assert better_name == "West Lexington Street"
+            #if name == "Baldwin Rd.":
+            #    assert better_name == "Baldwin Road"
+
+
 if __name__ == '__main__':
-    audit(OSMFILE)
+    test()
