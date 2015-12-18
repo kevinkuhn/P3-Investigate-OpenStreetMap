@@ -28,3 +28,27 @@ def add_tag(tag, tag_count):
         tag_count[tag] += 1
     else:
         tag_count[tag] = 1
+
+"""
+Function to check if we have problematic
+characters within the street name. This will
+be made to avoid that problematic characters
+would be loaded into MongoDB
+"""
+lower = re.compile(r'^([a-z]|_)*$')
+lower_colon = re.compile(r'^([a-z]|_)*:([a-z]|_)*$')
+problemchars = re.compile(r'[=\+/&<>;\'"\?%#$@\,\. \t\r\n]')
+
+def key_type(element, keys):
+    if element.tag == "tag":
+        key = element.attrib['k']
+        if lower.match(key):
+            keys["lower"] = keys["lower"] + 1
+        elif lower_colon.match(key):
+            keys["lower_colon"] = keys["lower_colon"] + 1
+        elif problemchars.match(key):
+            keys["problemchars"] = keys["problemchars"] + 1
+        else:
+            keys["other"] = keys["other"] + 1
+
+    return keys
