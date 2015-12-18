@@ -48,14 +48,23 @@ def check_ending(street_name, checkEnding):
         if street_name[len(street_name)-len(unex):len(street_name)] == unex:
             print "unexpected ending in: ", street_name
 
+# Create an audit an check with functions above
 def audit(osmfile):
     osm_file = open(osmfile, "r")
     street_types = defaultdict(set)
+    # search for start events with iterparse, for exampla <way...
     for event, elem in ET.iterparse(osm_file, events=("start",)):
-
+        # search withing the python object for elements with the tag property == "way"
         if elem.tag == "node" or elem.tag == "way":
+            # loop just within elements with <tag ... >
             for tag in elem.iter("tag"):
+                # if the k attribute of the tag is a street address then continue to audit
                 if is_street_name(tag):
-                    audit_street_type(street_types, tag.attrib['v'])
-
+                    # audit checks if it is an expected or unexpected street name based on attribute v
+                    audit_street_types(street_types, tag.attrib['v'])
+    # print out the list of unexpected street names as a dictonary
+    #pprint.pprint(dict(street_types))
+    # print the number of streets that do not fit to the expectations
+    #print len (street_types)
     return street_types
+    
