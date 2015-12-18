@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import xml.etree.cElementTree as ET
 from collections import defaultdict
 import re
@@ -65,7 +67,7 @@ def audit(osmfile):
                     # audit checks if it is an expected or unexpected street name based on attribute v
                     audit_street_types(street_types, tag.attrib['v'])
     # print out the list of unexpected street names as a dictonary
-    #pprint.pprint(dict(street_types))
+    pprint.pprint(dict(street_types))
     # print the number of streets that do not fit to the expectations
     #print len (street_types)
     return street_types
