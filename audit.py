@@ -10,24 +10,21 @@ OSMFILE = "source\lucerne.osm"
 street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 
 # Array with all the expected steet name endings
-expected = ["strasse","Strasse", "platz",
-			"weg","gasse","matt","matte",
+expected = ["strasse", "platz", "weg",
+			"allee","gasse","matt","matte",
 			"halde", "quai", "ring", "hof",
-			"weid"]
-
-checkEnding = ["str."]
+			"weid", "höhe", "wil", "egg"]
 
 # mapping definitions
-mapping = { "St" : "Street",
-            "St.": "Street",
-            "Rd." : "Road",
-            "Ave": "Avenue"
+mapping = { "str." : "strasse",
+            "Alee": "Allee",
+            "Alle": "Allee",
+            u"gäsli" : u"gässli",
+            u"paradiesgässli" : u"Paradiesgässli"
             }
 
 # Create an audit for street names that do not end with the expected street name endings
 def audit_street_types(street_types, street_name):
-    # check if a shorter form of street ending is used like "str." for "Strasse"
-    check_ending(street_name, checkEnding)
     m = street_type_re.search(street_name)
     # if street_type_re has found an element
     if m:
@@ -47,12 +44,6 @@ def audit_street_types(street_types, street_name):
 def is_street_name(elem):
     return (elem.attrib['k'] == "addr:street")
 
-# function to check if there is an unexpected, shorter ending used within the dataset
-def check_ending(street_name, checkEnding):
-    for unex in checkEnding:
-        if street_name[len(street_name)-len(unex):len(street_name)] == unex:
-            print "unexpected ending in: ", street_name
-
 def set_utf8(message):
 	import sys
 	# Change message into unicode and compile it with the defined charset
@@ -60,8 +51,9 @@ def set_utf8(message):
 
 def update_name(name, mapping):
     st_type = street_type_re.search(name).group()
-    if st_type in mapping:
-        name = street_type_re.sub(mapping[st_type],name)
+    for x in mapping:
+        if name.find(x)!=-1:
+            name =  name.replace(x,mapping[x])
     return name
 
 # Create an audit an check with functions above
@@ -86,16 +78,14 @@ def audit(osmfile):
 
 def test():
     st_types = audit(OSMFILE)
-    assert len(st_types) == 3
-    pprint.pprint(dict(st_types))
+    #assert len(st_types) == 3
+    #pprint.pprint(dict(st_types))
     for st_type, ways in st_types.iteritems():
         for name in ways:
             better_name = update_name(name, mapping)
             print name, "=>", better_name
-            #if name == "West Lexington St.":
-            #    assert better_name == "West Lexington Street"
-            #if name == "Baldwin Rd.":
-            #    assert better_name == "Baldwin Road"
+            if name == "paradiesgässli":
+                assert better_name == "Paradiesgässli"
 
 
 if __name__ == '__main__':
