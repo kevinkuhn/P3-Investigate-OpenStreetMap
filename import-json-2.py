@@ -4,7 +4,7 @@ import os
 import signal
 import subprocess
 
-filename="source/lucerne.osm"
+filename="lucerne.osm"
 
 #print "The downloaded file is {} MB".format(os.path.getsize(filename)/1.0e6) # convert from bytes to megabytes
 
@@ -21,31 +21,36 @@ db = client[db_name]
 
 # Build mongoimport command
 collection = filename[:filename.find(".")]
-working_directory = ""
+working_directory = "source/"
 json_file = filename + ".json"
 
-'''
-mongoimport_cmd = "mongoimport --db " + db_name + \
-                  " --collection " + collection + \
-                  " --file " + working_directory + json_file
+print collection
 
 # Before importing, drop collection if it exists
 if collection in db.collection_names():
     print "dropping collection"
-    db[collection].drop()'''
+    db[collection].drop()
+
+mongoimport_cmd = "mongoimport --db " + db_name + \
+                  " --collection " + collection + \
+                  " --file " + working_directory + json_file
 
 # Execute the command
-#print "Executing: " + mongoimport_cmd
-#subprocess.call(mongoimport_cmd.split())
+print "Executing: " + mongoimport_cmd
+subprocess.call(mongoimport_cmd.split())
 
 volusia_flagler = db[collection]
 
-print volusia_flagler.find().count()
-print volusia_flagler.find()
-
+print "db[collection]", db[collection]
+print "volusia_flagler", volusia_flagler
+print "volusia_flagler.find().count()", volusia_flagler.find().count()
+print "volusia_flagler.find()", volusia_flagler.find()
 print len(volusia_flagler.distinct('created.user'))
 
-print volusia_flagler.aggregate([{"$group" : {"_id" : "$created.user", "count" : {"$sum" : 1}}}, \
+import queries
+
+
+'''volusia_flagler.aggregate([{"$group" : {"_id" : "$created.user", "count" : {"$sum" : 1}}}, \
                            {"$sort" : {"count" : -1}}, \
                            {"$limit" : 1}])['result']
 
@@ -89,3 +94,4 @@ volusia_flagler.aggregate([{"$project" : {"dayOfWeek" : {"$dayOfWeek" : "$create
                            {"$group" : {"_id" : "$dayOfWeek", "count" : {"$sum" : 1}}}, \
                            {"$sort" : {"_id" : 1}}])['result']
 
+'''

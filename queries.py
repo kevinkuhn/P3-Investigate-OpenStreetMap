@@ -1,4 +1,4 @@
-entries = db.cities
+entries = db.lucerne
 
 def find():
     
