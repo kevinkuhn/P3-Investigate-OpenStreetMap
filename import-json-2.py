@@ -6,13 +6,6 @@ import subprocess
 
 filename="lucerne.osm"
 
-print "The downloaded file is {} MB".format(os.path.getsize(filename)/1.0e6) # convert from bytes to megabytes
-
-
-# The os.setsid() is passed in the argument preexec_fn so
-# it's run after the fork() and before  exec() to run the shell.
-#pro = subprocess.Popen("mongod", preexec_fn = os.setsid) 
-
 from pymongo import MongoClient
 db_name = "osm"
 
@@ -24,18 +17,17 @@ collection = filename[:filename.find(".")]
 working_directory = "source/"
 json_file = filename + ".json"
 
-print collection
-
 # Before importing, drop collection if it exists
 if collection in db.collection_names():
     print "dropping collection"
     db[collection].drop()
 
+# execute import command by cmd
 mongoimport_cmd = "mongoimport --db " + db_name + \
                   " --collection " + collection + \
                   " --file " + working_directory + json_file
 
-# Execute the command
+# Execute import command by cmd
 print "Executing: " + mongoimport_cmd
 subprocess.call(mongoimport_cmd.split())
 
@@ -117,9 +109,7 @@ def find():
     
     for e in expected:
         numOfCounts = entries.find({"address.street" : {"$exists": 1},"address.street" : {"$regex": e}}, projection).count()
-        print "number of entries with street name that contains ", e,": ", numOfCounts
-        
-find()
+        print "number of entries with street name that contains ", e,": ", numOfCount
 
 def find_restaurant_by_postcode(postcode):
     projection = {"_id" : 0, "amenity" : 1, "name" : 1, "address.street" : 1, "address.postcode" : 1}
