@@ -30,16 +30,14 @@ def audit_restaurant_types(restaurant_types, street_name):
     # if street_type_re has found an element
     if m:
         street_type = m.group() 
-        myLoops = 0
         # loop to check if the steet name ending matches with one of the endings for the expected list
-        for check in expected:
-            if check not in expected:
-                restaurant_types[street_type].add(street_name)
+        for check not in expected:
+            restaurant_types[street_type].add(street_name)
                    
 
 # Returns the k attribute for XML list if it equal to a street address
 def is_restaurant(elem):
-    return (elem.attrib['k'] == "restauant")
+    return (elem.attrib['k'] == "amenity")
 '''
 def set_utf8(message):
     import sys
@@ -92,3 +90,17 @@ def test():
 
 if __name__ == '__main__':
     test()
+
+
+
+'''
+  <node id="259538738" lat="47.0302022" lon="8.2922993" version="3" timestamp="2010-12-07T06:46:38Z" changeset="6571374" uid="74900" user="FischersFritz"/>
+  <node id="259538740" lat="47.0310623" lon="8.2929684" version="5" timestamp="2010-12-07T06:46:32Z" changeset="6571374" uid="74900" user="FischersFritz"/>
+  <node id="259538742" lat="47.0296533" lon="8.2938757" version="3" timestamp="2010-12-07T06:46:24Z" changeset="6571374" uid="74900" user="FischersFritz"/>
+  <node id="259538743" lat="47.0296138" lon="8.2937561" version="2" timestamp="2010-12-07T06:46:37Z" changeset="6571374" uid="74900" user="FischersFritz">
+    <tag k="amenity" v="restaurant"/>
+    <tag k="name" v="Giovannini's"/>
+  </node>
+  <node id="259538745" lat="47.0287082" lon="8.2977724" version="3" timestamp="2011-01-04T20:04:55Z" changeset="6864989" uid="74900" user="FischersFritz"/>
+  <node id="259538746" lat="47.0291184" lon="8.2974528" version="3" timestamp="2011-01-04T20:05:24Z" changeset="6864989" uid="74900" user="FischersFritz"/>
+  '''
