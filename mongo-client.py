@@ -17,8 +17,7 @@ def get_db():
     return db
 
 def add_data(db, data):
-    print data
-    #db.cities.insert_many(data)
+    db.cities.insert_one(data)
 
 def load_json(filepath):
     data = open(filepath) #opens the json file and saves the raw contents
@@ -40,21 +39,35 @@ if __name__ == "__main__":
     # clean up the whole db
     print "########### DATABASE CLEANOUT ###########"
     print "before", db.cities.count() 
-    db.cities.drop()
+    #db.cities.drop()
     print "after", db.cities.count()
     print "########### END OF CLEANOUT ###########"
     # import json file
     #load_json('source/lucerne.osm.json')
-    add_data(db, load_json('source/lucerne.osm.json'))
+    #add_data(db, load_json('source/lucerne-test.osm.json'))
     #print data
             #data =  json.load(line)
             #data.append(json.loads(line))
             #print data
         # show first entry
-        #print db.cities.find_one()
+    print db.cities.find_one()
         # show collections
-        #print db.collection_names(include_system_collections=False)
+    print db.collection_names(include_system_collections=False)
         #number of data set entries
-        #print db.cities.count()
+    print db.cities.count()
+
+        # show first entry
+    print db.cities.lucerne.find_one()
+        # show collections
+    print db.collection_names(include_system_collections=False)
+        #number of data set entries
+    print db.cities.lucerne.count()
 
         #print db
+    # Print out the 10 most active user
+    most_active_user = db.cities.aggregate([
+            { "$group": { "_id": "$created.user", "count": { "$sum" : 1} } },
+            { "$sort": { "count": -1 } },
+            {"$limit" : 10}])
+
+    list(most_active_user)
