@@ -6,11 +6,15 @@ import subprocess
 
 filename="lucerne.osm"
 
+########################## CONNECT MONGODB ##########################
+
 from pymongo import MongoClient
 db_name = "osm"
 
 client = MongoClient('localhost:27017')
 db = client[db_name]
+
+########################## IMPORT JSON ##########################
 
 # Build mongoimport command
 collection = filename[:filename.find(".")]
@@ -47,53 +51,9 @@ pipeline = [{"$group": { "_id": "$created.user", "count": { "$sum" : 1} } },
 most_active_user = db.lucerne.aggregate(pipeline)
 print list(most_active_user)
 
-
-'''volusia_flagler.aggregate([{"$group" : {"_id" : "$created.user", "count" : {"$sum" : 1}}}, \
-                           {"$sort" : {"count" : -1}}, \
-                           {"$limit" : 1}])['result']
-
-print volusia_flagler.aggregate({"$group" : {"_id" : "$type", "count" : {"$sum" : 1}}})['result']
-
-node_id = volusia_flagler.aggregate([{"$unwind" : "$node_refs"}, \
-                                     {"$group" : {"_id" : "$node_refs", "count" : {"$sum" : 1}}}, \
-                                     {"$sort" : {"count" : -1}}, \
-                                     {"$limit" : 1}])['result'][0]['_id']
-
-pprint.pprint(volusia_flagler.find({"id" : node_id})[0])
-
-volusia_flagler.find({"address.street" : {"$exists" : 1}}).count()
-
-volusia_flagler.aggregate([{"$match" : {"address.postcode" : {"$exists" : 1}}}, \
-                           {"$group" : {"_id" : "$address.postcode", "count" : {"$sum" : 1}}}, \
-                           {"$sort" : {"count" : -1}}])['result']
-
-volusia_flagler.aggregate([{"$match" : {"address.city" : {"$exists" : 1}}}, \
-                           {"$group" : {"_id" : "$address.city", "count" : {"$sum" : 1}}}, \
-                           {"$sort" : {"count" : -1}}, \
-                           {"$limit" : 5}])['result']
-
-volusia_flagler.aggregate([{"$match" : {"amenity" : {"$exists" : 1}}}, \
-                           {"$group" : {"_id" : "$amenity", "count" : {"$sum" : 1}}}, \
-                           {"$sort" : {"count" : -1}}, \
-                           {"$limit" : 10}])['result']
-
-religions = volusia_flagler.aggregate([{"$match" : {"amenity" : "place_of_worship"}}, \
-                           {"$group" : {"_id" : {"religion" : "$religion", "denomination" : "$denomination"}, "count" : {"$sum" : 1}}}, \
-                           {"$sort" : {"count" : -1}}])['result']
-
-pprint.pprint(religions)
-
-volusia_flagler.aggregate([{"$match" : {"leisure" : {"$exists" : 1}}}, \
-                           {"$group" : {"_id" : "$leisure", "count" : {"$sum" : 1}}}, \
-                           {"$sort" : {"count" : -1}}, \
-                           {"$limit" : 10}])['result']
-
-volusia_flagler.aggregate([{"$project" : {"dayOfWeek" : {"$dayOfWeek" : "$created.timestamp"}}}, \
-                           {"$group" : {"_id" : "$dayOfWeek", "count" : {"$sum" : 1}}}, \
-                           {"$sort" : {"_id" : 1}}])['result']
-'''
-
 entries = db.lucerne
+
+########################## QUERIES ##########################
 
 def find():
     
@@ -122,13 +82,13 @@ def find_restaurant_by_postcode(postcode):
 pprint.pprint(list(find_restaurant_by_postcode(6006)))
 
 # Print out the 10 most active user
-pipeline = [{"$group": { "_id": "$created.user", "count": { "$sum" : 1} } },
+def most_active_useres():
+	pipeline = [{"$group": { "_id": "$created.user", "count": { "$sum" : 1} } },
 	{ "$sort": { "count": -1 } },
 	{"$limit" : 10}]
+	return list(entries.aggregate(pipeline))
 
-most_active_user = entries.aggregate(pipeline)
-list(most_active_user)
-
+pprint.pprint(most_active_useres())
 
 def wheelchair_friendly():
     projection = {"_id" : 0, "amenity" : 1, "name" : 1, "address.street" : 1, "address.postcode" : 1}
