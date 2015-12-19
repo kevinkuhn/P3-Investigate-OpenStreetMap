@@ -29,11 +29,9 @@ def find_restaurant_by_postcode(postcode):
 pprint.pprint(list(find_restaurant_by_postcode(6006)))
 
 # Print out the 10 most active user
-pipeline = (
-	{"$group": { "_id": "$created.user", "count": { "$sum" : 1} } },
+pipeline = [{"$group": { "_id": "$created.user", "count": { "$sum" : 1} } },
 	{ "$sort": { "count": -1 } },
-	{"$limit" : 10}])
-	)
+	{"$limit" : 10}]
 
 most_active_user = entries.aggregate(pipeline)
 list(most_active_user)
@@ -56,28 +54,25 @@ print entries.find({"amenity" : "toilets"}).count()
 pprint.pprint(list(show_toilets()))
 
 # Show all the different types of restaurants and count them
-pipeline = (
-	{ "$match" : { "cuisine": { "$exists": 1}}},
+pipeline = [{ "$match" : { "cuisine": { "$exists": 1}}},
     { "$group": { "_id": "$cuisine", "count": { "$sum" : 1} } },
-    { "$sort": { "count": -1 } })
+    { "$sort": { "count": -1 } }]
 
 count_restaurants = entries.aggregate(pipeline)
 list(count_restaurants)
 
 # Sort postcodes by count     
-pipeline = (
-	{"$match":{"address.postcode":{"$exists":1}}}, 
+pipeline = [{ "$match":{"address.postcode":{"$exists":1}}}, 
     {"$group":{"_id":"$address.postcode", "count":{"$sum":1}}}, 
-    {"$sort":{"count": -1}})
+    {"$sort":{"count": -1}}]
 
 postcodes=entries.aggregate(pipeline)
 list(postcodes)
 
 # Sort cities by count, descending
-pipeline = (
-	{"$match":{"address.city":{"$exists":1}}}, 
+pipeline = [{"$match":{"address.city":{"$exists":1}}}, 
     {"$group":{"_id":"$address.city", "count":{"$sum":1}}}, 
-    {"$sort":{"count":-1}})
+    {"$sort":{"count":-1}}]
 
 cities_count = entries.aggregate(pipeline)
 list(cities_count)
