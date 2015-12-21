@@ -66,12 +66,21 @@ def find():
     print "number of entries with street name that contains 'Strasse': ",entries.find({"address.street" : {"$exists": 1},"address.street" : {"$regex": "[Ss]trasse"}}, projection).count()
     
     expected = ["strasse","Strasse", "platz", "weg","gasse","str.","matt","matte","halde", "quai", "ring", "hof", "weid"]
-    
+    vLabels = []
+    vCounts = []
+
     for e in expected:
-        numOfCounts = entries.find({"address.street" : {"$exists": 1},"address.street" : {"$regex": e}}, projection).count()
+        vLabels.append(e)
+        numOfCount = entries.find({"address.street" : {"$exists": 1},"address.street" : {"$regex": e}}, projection).count()
+        vCounts.append(numOfCount)
         print "number of entries with street name that contains ", e,": ", numOfCount
 
-def find_restaurant_by_postcode(postcode):
+    import visualize.py
+    pie_chart(vLabels,vCounts,"Street-Name-Types")
+
+find()
+
+'''def find_restaurant_by_postcode(postcode):
     projection = {"_id" : 0, "amenity" : 1, "name" : 1, "address.street" : 1, "address.postcode" : 1}
     return entries.find({ "$and": [ {"address.postcode" : {"$eq" : str(postcode)}},
                                    {"amenity": {"$eq" : "restaurant"}},
@@ -83,10 +92,10 @@ pprint.pprint(list(find_restaurant_by_postcode(6006)))
 
 # Print out the 10 most active user
 def most_active_useres():
-	pipeline = [{"$group": { "_id": "$created.user", "count": { "$sum" : 1} } },
-	{ "$sort": { "count": -1 } },
-	{"$limit" : 10}]
-	return list(entries.aggregate(pipeline))
+    pipeline = [{"$group": { "_id": "$created.user", "count": { "$sum" : 1} } },
+    { "$sort": { "count": -1 } },
+    {"$limit" : 10}]
+    return list(entries.aggregate(pipeline))
 
 pprint.pprint(most_active_useres())
 
@@ -128,4 +137,4 @@ pipeline = [{"$match":{"address.city":{"$exists":1}}},
     {"$sort":{"count":-1}}]
 
 cities_count = entries.aggregate(pipeline)
-list(cities_count)
+list(cities_count)'''
