@@ -26,7 +26,7 @@ mapping = { "str." : "strasse",
 # Create an audit for street names that do not end with the expected street name endings
 def audit_street_types(street_types, street_name):
     m = street_type_re.search(street_name)
-    # if street_type_re has found an element
+    # after street_type_re has compiled an element
     if m:
         street_type = m.group() 
         myLoops = 0
