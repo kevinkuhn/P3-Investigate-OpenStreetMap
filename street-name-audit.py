@@ -60,7 +60,7 @@ def update_name(name, mapping):
 def audit(osmfile):
     osm_file = open(osmfile, "r")
     street_types = defaultdict(set)
-    # search for start events with iterparse, for exampla <way...
+    # search for start events with iterparse, for example <way...
     for event, elem in ET.iterparse(osm_file, events=("start",)):
         # search withing the python object for elements with the tag property == "way"
         if elem.tag == "node" or elem.tag == "way":
