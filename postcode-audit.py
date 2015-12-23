@@ -10,7 +10,8 @@ import json
 import codecs
 import sys
 
-########### LOAD CSV FILE WITH POSTCODES ########### 
+########### LOAD CSV FILE WITH POSTCODES ###########
+
 DATADIRCSV = "source/"
 DATAFILECSV = "mapping-post-codes.csv"
 
@@ -30,7 +31,7 @@ def parse_csv(datafile):
                 postcodes.append(line["postcode"])
     return postcodeNamesCSV
 
-########### LOAD OSM FILE FROM OPENSTREETMAP ########### 
+########### LOAD OSM FILE FROM OPENSTREETMAP ###########
 
 OSMFILE = u"source\lucerne.osm"
 postcode_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
