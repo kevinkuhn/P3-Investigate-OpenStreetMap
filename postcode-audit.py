@@ -4,80 +4,110 @@ import xml.etree.cElementTree as ET
 from collections import defaultdict
 import re
 import pprint
+import csv
+import os
+import json
+import codecs
 import sys
 
-OSMFILE = "source\lucerne.osm"
-restaurant_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
+########### LOAD CSV FILE WITH POSTCODES ########### 
+DATADIRCSV = "source/"
+DATAFILECSV = "mapping-post-codes.csv"
+
+postcodes = []
+
+def parse_csv(datafile):
+    
+    postcodeNamesCSV = []
+    
+    n = 0
+    with open(datafile,'rb') as sd:
+        r = csv.DictReader(sd)
+        for line in r:
+            postcodeNamesCSV.append({'postcode' : line["postcode"], 'name' : line["streetName"]})
+            if line["postcode"] not in postcodes:
+                # add the postocode if it is not already in the array > to get the unique postcodes for Lucerne
+                postcodes.append(line["postcode"])
+    return postcodeNamesCSV
+
+########### LOAD OSM FILE FROM OPENSTREETMAP ########### 
+
+OSMFILE = u"source\lucerne.osm"
+postcode_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 
 # mapping definitions
-mapping = { "Chimney?s" : "Chimeney's",
-            "felsenegg": "Felsenegg",
-            "KAFFEEPLUS": "KaffeePlus",
-            "Mill?Feuille": "Mill'Feuille"
+mapping = { "str." : "strasse",
+            "Alee": "Allee"
             }
 
-# Create an audit for restaurant names
-def audit_restaurant_types(restaurant_types, restaurant_name):
-    m = restaurant_type_re.search(restaurant_name)
-    # after restaurant_type_re has compiled an element
+# Create an audit for postcode that do not end with the expected street name endings
+def audit_postcode_types(postcode_types, postcode):
+    m = postcode_type_re.search(postcode)
+    # after postcode_type_re has compiled an element
     if m:
-        rest_type = m.group() 
-        restaurant_types[rest_type].add(restaurant_name)
-                   
-# Returns the k attribute for XML list if it equal to a street address
-def is_restaurant(elem):
-    return (elem.attrib['k'] == "amenity")
+        postcode_type = m.group() 
+        if postcode_type not in expected:
+            postcode_types[postcode_type].add(postcode)
+    
+    return postcode_types
+
+# Returns the k attribute for XML list if it equal to a postcode
+def is_postcode(elem):
+    return (elem.attrib['k'] == "addr:postcode")
 
 def has_name(elem):
-    return (elem.attrib['k'] == "name")
+    return (elem.attrib['k'] == "addr:name")
 
 def update_name(name, mapping):
-    st_type = restaurant_type_re.search(name).group()
+    st_type = postcode_type_re.search(name).group()
     for x in mapping:
         if name.find(x)!=-1:
-            new_name =  name.replace(x,mapping[x])
-            print name,"=>",new_name
-            name = new_name
+            name =  name.replace(x,mapping[x])
     return name
 
 # Create an audit an check with functions above
 def audit(osmfile):
     osm_file = open(osmfile, "r")
-    restaurant_types = defaultdict(set)
-    # search for start events with iterparse, for example <tag...
+    postcode_types = defaultdict(set)
+
+    pcode = ""
+    pcodeName = ""
+    postcodeNames = []
+
+    # search for start events with iterparse, for example <way...
     for event, elem in ET.iterparse(osm_file, events=("start",)):
         # search withing the python object for elements with the tag property == "way"
-        if elem.tag == "node" or elem.tag == "amenity":
+        if elem.tag == "node" or elem.tag == "way":
             # loop just within elements with <tag ... >
-            setPass = False
-            # Encoding of system
-            stdout_encoding = sys.stdout.encoding or sys.getfilesystemencoding()
-
             for tag in elem.iter("tag"):
-                if setPass == True:
-                    if tag.attrib['k'] == 'name':
-                        # Clean up wrong restaurant names by using elements from the mapping
-                        update_name(tag.attrib['v'].encode(stdout_encoding, errors='replace'),mapping)
-                    setPass = False
-                # if the k attribute of the tag is an amenity and v attribute is a restaurant then continue to audit
-                # with setPass a "Gate" will be open to pass the attributes of the next element
-                if tag.attrib['k'] == 'amenity' and tag.attrib['v'] == 'restaurant' :
-                    setPass = True
+                # if the k attribute of the tag is a postcode then continue to audit
+                if tag.attrib["k"] == "addr:postcode":
+                    pcode = tag.attrib["v"]
+                if tag.attrib["k"] == "name":
+                    pcodeName = tag.attrib["v"] #.decode('utf-8').encode(stdout_encoding, errors='ignore')
+            if pcode != "" and pcodeName != "":
+                postcodeNames.append({'postcode' : pcode, 'name' : pcodeName}) #.encode(stdout_encoding, errors='ignore')})
+                #reset
+                pcode, pcodeName = "",""
+            # start audit
+            #audit_postcode_types(postcode_types, tag.attrib['v'])
+    return postcodeNames
 
-                if is_restaurant(tag):
-                    if has_name(tag):
-                        # audit checks if it is an expected or unexpected street name based on attribute v
-                        audit_restaurant_types(restaurant_types, tag.attrib['v'])
-                        print restaurant_types
-    return restaurant_types
+def compare_csv(osmOutput,csvOutput):
+    print len(osmOutput)
+    print len(csvOutput)
+    for element in osmOutput:
+        if element['name'] != "":
+            for checks in csvOutput:
+                if element['name'] == checks['name']:
+                    if element['postcode'] != checks['postcode']:
+                        #print "1 Different postcodes: ",element['name'],checks['name'],element['postcode'],checks['postcode']
+                        # Change postcodes
+                        element['postcode'] =  element['postcode'].replace(element['postcode'],checks['postcode'])
+                        #print "Update postcodes: ",element['name'],checks['name'],element['postcode'],checks['postcode']
 
-def test():
-    st_types = audit(OSMFILE)
-    
-    for st_type, ways in st_types.iteritems():
-                    for name in ways:
-                        better_name = update_name(name, mapping)
-                        print name, "=>", better_name
-                        
 if __name__ == '__main__':
-    test()
+    pc_types_osm = audit(OSMFILE)
+    datafile_csv = os.path.join(DATADIRCSV, DATAFILECSV)
+    pc_types_csv = parse_csv(datafile_csv)
+    compare_csv(pc_types_osm,pc_types_csv)
