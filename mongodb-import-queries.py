@@ -76,7 +76,7 @@ def find():
         print "number of entries with street name that contains ", e,": ", numOfCount
 
     from visualize import pie_chart
-    pie_chart(vLabels,vCounts,"Street-Name-Types")
+    pie_chart(vLabels,vCounts,"Street-Name-Endings")
 
 find()
 
