@@ -22,8 +22,6 @@ def pie_chart(vLabels,vCounts,charTitle):
 
 	save('visualize/'+charTitle)
 
-	#save('visualize/'+charTitle)
-
 def save(path, ext='png', close=True, verbose=True):
 	# Extract the directory and filename from the given path
 	print path
