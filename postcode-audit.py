@@ -6,9 +6,6 @@ import re
 import pprint
 import csv
 import os
-import json
-import codecs
-import sys
 
 ########### LOAD CSV FILE WITH POSTCODES ###########
 
@@ -36,12 +33,7 @@ def parse_csv(datafile):
 OSMFILE = u"source\lucerne.osm"
 postcode_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 
-# mapping definitions
-mapping = { "str." : "strasse",
-            "Alee": "Allee"
-            }
-
-# Create an audit for postcode that do not end with the expected street name endings
+# Create an audit for postcode that do not end with the expected postcodes
 def audit_postcode_types(postcode_types, postcode):
     m = postcode_type_re.search(postcode)
     # after postcode_type_re has compiled an element
@@ -95,17 +87,16 @@ def audit(osmfile):
     return postcodeNames
 
 def compare_csv(osmOutput,csvOutput):
-    print len(osmOutput)
-    print len(csvOutput)
+    print "Number of entries in OSM file",len(osmOutput)
+    print "Number of entries in CSV file",len(csvOutput)
     for element in osmOutput:
         if element['name'] != "":
             for checks in csvOutput:
                 if element['name'] == checks['name']:
                     if element['postcode'] != checks['postcode']:
-                        #print "1 Different postcodes: ",element['name'],checks['name'],element['postcode'],checks['postcode']
+                        print "Different postcodes: ",element['name'],element['postcode'],"=>",checks['name'],checks['postcode']
                         # Change postcodes
                         element['postcode'] =  element['postcode'].replace(element['postcode'],checks['postcode'])
-                        #print "Update postcodes: ",element['name'],checks['name'],element['postcode'],checks['postcode']
 
 if __name__ == '__main__':
     pc_types_osm = audit(OSMFILE)
