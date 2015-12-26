@@ -10,19 +10,23 @@ OSMFILE = "source\lucerne.osm"
 street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 
 # Array with all the expected steet name endings
-expected = ["strasse", "platz", "weg",
+expected = ["-Strasse", "strasse", "platz", "weg",
 			"allee","gasse","matt","matte",
 			"halde", "quai", "ring", "hof",
 			"weid", "höhe", "wil", "egg"]
 
 # mapping definitions
-mapping = { "str." : "strasse",
-            "Alee": "Allee",
-            "Alle": "Allee",
+mapping = { u"str." : u"strasse",
+            u"Alee": u"Allee",
+            u"Alle": u"Allee",
             u"gäsli" : u"gässli",
+            u"dorv" : u"dorf",
+            u"gase" : u"gasse",
+            u"veg" : u"weg",
+            u"höffli" : u"höfli",
+            u"rein" : u"rain",
             u"paradiesgässli" : u"Paradiesgässli"
             }
-
 # Create an audit for street names that do not end with the expected street name endings
 def audit_street_types(street_types, street_name):
     m = street_type_re.search(street_name)
