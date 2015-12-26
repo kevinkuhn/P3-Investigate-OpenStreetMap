@@ -35,14 +35,16 @@ mongoimport_cmd = "mongoimport --db " + db_name + \
 print "Executing: " + mongoimport_cmd
 subprocess.call(mongoimport_cmd.split())
 
-volusia_flagler = db[collection]
+# Number of documents
+pprint.pprint(entries.find().count())
+                                                
+# Number of nodes
+pprint.pprint(entries.find({"type":"node"}).count())
 
-print "db[collection]", db[collection]
-print "volusia_flagler", volusia_flagler
-print "volusia_flagler.find().count()", volusia_flagler.find().count()
-print "volusia_flagler.find()", volusia_flagler.find()
-print len(volusia_flagler.distinct('created.user'))
+# Number of ways
+pprint.pprint(entries.find({"type":"way"}).count())
 
+print len(entries.distinct('created.user'))
 
 pipeline = [{"$group": { "_id": "$created.user", "count": { "$sum" : 1} } },
 	{ "$sort": { "count": -1 } },
@@ -75,8 +77,8 @@ def find():
         vCounts.append(numOfCount)
         print "number of entries with street name that contains ", e,": ", numOfCount
 
-    from visualize import pie_chart
-    pie_chart(vLabels,vCounts,"Street-Name-Endings")
+    #from visualize import pie_chart,save
+    #pie_chart(vLabels,vCounts,"Street-Name-Endings")
 
 find()
 
