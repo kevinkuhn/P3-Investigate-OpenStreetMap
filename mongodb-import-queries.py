@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
 import pprint
 import subprocess
 
@@ -35,27 +34,18 @@ mongoimport_cmd = "mongoimport --db " + db_name + \
 print "Executing: " + mongoimport_cmd
 subprocess.call(mongoimport_cmd.split())
 
-# Number of documents
-pprint.pprint(entries.find().count())
-                                                
-# Number of nodes
-pprint.pprint(entries.find({"type":"node"}).count())
-
-# Number of ways
-pprint.pprint(entries.find({"type":"way"}).count())
-
-print len(entries.distinct('created.user'))
-
-pipeline = [{"$group": { "_id": "$created.user", "count": { "$sum" : 1} } },
-	{ "$sort": { "count": -1 } },
-	{"$limit" : 10}]
-
-most_active_user = db.lucerne.aggregate(pipeline)
-print list(most_active_user)
+########################## QUERIES ##########################
 
 entries = db.lucerne
 
-########################## QUERIES ##########################
+# Number of documents
+print "Number of documents:", entries.find().count()
+                                                
+# Number of nodes
+print "Number of nodes:", entries.find({"type":"node"}).count()
+
+# Number of ways
+print "Number of ways", entries.find({"type":"way"}).count()
 
 def find():
     
@@ -77,26 +67,31 @@ def find():
         vCounts.append(numOfCount)
         print "number of entries with street name that contains ", e,": ", numOfCount
 
-    #from visualize import pie_chart,save
-    #pie_chart(vLabels,vCounts,"Street-Name-Endings")
+    from visualize import pie_chart
+    pie_chart(vLabels,vCounts,"Street-Name-Endings")
 
 find()
 
-'''def find_restaurant_by_postcode(postcode):
-    projection = {"_id" : 0, "amenity" : 1, "name" : 1, "address.street" : 1, "address.postcode" : 1}
+def find_restaurant_by_postcode(postcode,typeOfRestaurant):
+    projection = {"_id" : 0, "amenity" : 1, "cuisine" : 1, "name" : 1, "address.street" : 1, "address.postcode" : 1}
     return entries.find({ "$and": [ {"address.postcode" : {"$eq" : str(postcode)}},
-                                   {"amenity": {"$eq" : "restaurant"}},
-                                 {"name": {"$exists": 1}},
-                                 {"address.street": {"$exists": 1}} ] }, projection)
+                                {"amenity": {"$eq" : "restaurant"}},
+                                {"cuisine": {"$eq" : str(typeOfRestaurant)}},
+                                {"name": {"$exists": 1}},
+                                {"address.street": {"$exists": 1}} ] }, projection)
 
-# find a restaurant in my hometown
-pprint.pprint(list(find_restaurant_by_postcode(6006)))
+#find a vegetarian restaurant in my hometown
+typeOfRestaurant = "vegetarian"
+postcode = 6006
+print "Searching for an",typeOfRestaurant,"restaurant in the area of postcode",postcode,"..."
+pprint.pprint(list(find_restaurant_by_postcode(postcode, typeOfRestaurant)))
 
-# Print out the 10 most active user
+
+# Print out the 5 most active user
 def most_active_useres():
     pipeline = [{"$group": { "_id": "$created.user", "count": { "$sum" : 1} } },
     { "$sort": { "count": -1 } },
-    {"$limit" : 10}]
+    {"$limit" : 5}]
     return list(entries.aggregate(pipeline))
 
 pprint.pprint(most_active_useres())
@@ -106,37 +101,33 @@ def wheelchair_friendly():
     return entries.find({"wheelchair" : "yes"}, projection)
 
 # show all places that are wheelchair friendly
-print entries.find({"wheelchair" : "yes"}).count()
 pprint.pprint(list(wheelchair_friendly()))
+print "Number of wheelchair friendly places:",entries.find({"wheelchair" : "yes"}).count()
 
 def show_toilets():
     projection = {"_id" : 0, "amenity" : 1, "name" : 1, "address.street" : 1, "pos" : 1}
     return entries.find({"amenity" : "toilets"}, projection)
 
-# show all toilets with coordinates
-print entries.find({"amenity" : "toilets"}).count()
 pprint.pprint(list(show_toilets()))
+print "Number of public toilets:",entries.find({"amenity" : "toilets"}).count()
 
 # Show all the different types of restaurants and count them
 pipeline = [{ "$match" : { "cuisine": { "$exists": 1}}},
     { "$group": { "_id": "$cuisine", "count": { "$sum" : 1} } },
     { "$sort": { "count": -1 } }]
 
-count_restaurants = entries.aggregate(pipeline)
-list(count_restaurants)
+pprint.pprint(list(entries.aggregate(pipeline)))
 
 # Sort postcodes by count     
 pipeline = [{ "$match":{"address.postcode":{"$exists":1}}}, 
     {"$group":{"_id":"$address.postcode", "count":{"$sum":1}}}, 
     {"$sort":{"count": -1}}]
 
-postcodes=entries.aggregate(pipeline)
-list(postcodes)
+pprint.pprint(list(entries.aggregate(pipeline)))
 
 # Sort cities by count, descending
 pipeline = [{"$match":{"address.city":{"$exists":1}}}, 
     {"$group":{"_id":"$address.city", "count":{"$sum":1}}}, 
     {"$sort":{"count":-1}}]
 
-cities_count = entries.aggregate(pipeline)
-list(cities_count)'''
+pprint.pprint(list(entries.aggregate(pipeline)))
